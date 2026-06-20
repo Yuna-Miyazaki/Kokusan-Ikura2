@@ -19,6 +19,11 @@ export function randomIntInclusive(minimum: number, maximum: number, random = Ma
   return Math.floor(random() * (maximum - minimum + 1)) + minimum;
 }
 
+export function generateInitialRemorse(random = Math.random): number {
+  const biasedRandom = random() ** GAME_BALANCE.persuasion.initialRemorseExponent;
+  return Math.min(100, Math.floor(biasedRandom * 101));
+}
+
 export function getPersuasionBonus(method: PersuasionMethod, random = Math.random): number {
   const settings = GAME_BALANCE.persuasion;
   if (method === "kind") return settings.kindBonus;
@@ -26,9 +31,16 @@ export function getPersuasionBonus(method: PersuasionMethod, random = Math.rando
   return randomIntInclusive(settings.sternBonusMin, settings.sternBonusMax, random);
 }
 
+export function confessionProbability(finalRemorse: number): number {
+  const remorse = clampRemorse(finalRemorse);
+  const { confessionThreshold, minimumConfessionProbability } = GAME_BALANCE.persuasion;
+  if (remorse < confessionThreshold) return 0;
+  const progress = (remorse - confessionThreshold) / (100 - confessionThreshold);
+  return minimumConfessionProbability + progress * (1 - minimumConfessionProbability);
+}
+
 export function resolvePersuasion(finalRemorse: number, random = Math.random): Outcome {
-  if (finalRemorse < GAME_BALANCE.persuasion.confessionThreshold) return "culprit-escaped";
-  return random() < finalRemorse / 100 ? "culprit-arrested" : "culprit-escaped";
+  return random() < confessionProbability(finalRemorse) ? "culprit-arrested" : "culprit-escaped";
 }
 
 export function weaponPower(weapon: WeaponId): number {

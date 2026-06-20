@@ -15,7 +15,7 @@ export function WeaponSelectScreen({ onConfirm }: WeaponSelectScreenProps) {
   const [selected, setSelected] = useState<WeaponId>("pipe");
   return (
     <SceneShell eyebrow="CHOOSE YOUR TOOL" title="相棒を選べ！">
-      <p className="instruction">同じ速さでも、武器によってダメージが変わります。</p>
+      <p className="instruction">殴る速さが同じでも、武器によってダメージが変わります。</p>
       <div className="weapon-grid">
         {(Object.keys(GAME_BALANCE.weapons) as WeaponId[]).map((id) => {
           const weapon = GAME_BALANCE.weapons[id];

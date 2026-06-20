@@ -1,15 +1,20 @@
+import { GAME_BALANCE } from "../config/gameBalance";
 import { Character } from "./Character";
+import { RemorseGauge } from "./RemorseGauge";
 import { SceneShell } from "./SceneShell";
 
 interface ActionSelectScreenProps {
+  initialRemorse: number;
   onPersuade: () => void;
   onHit: () => void;
 }
 
-export function ActionSelectScreen({ onPersuade, onHit }: ActionSelectScreenProps) {
+export function ActionSelectScreen({ initialRemorse, onPersuade, onHit }: ActionSelectScreenProps) {
   return (
     <SceneShell eyebrow="CASE 01　犯人を追いつめた！" title="さて、どうする？">
       <div className="action-scene">
+        <RemorseGauge value={initialRemorse} />
+        <div className="remorse-chance"><strong>{GAME_BALANCE.persuasion.confessionThreshold}以上</strong>なら<br />自白のチャンス！</div>
         <div className="speech-bubble">ま、待て！<br />話せばわかる…かも？</div>
         <Character mood="nervous" className="action-culprit" />
         <span className="question-mark question-mark--one">?</span>

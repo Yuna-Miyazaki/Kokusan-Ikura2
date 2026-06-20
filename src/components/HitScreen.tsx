@@ -15,6 +15,33 @@ interface HitScreenProps {
 
 interface Point { x: number; y: number }
 
+const SPEED_SEGMENTS = 14;
+
+function SpeedMeter({ speed, power }: { speed: number; power: number }) {
+  const maximumSpeed = GAME_BALANCE.damage.maximumSpeed;
+  const speedPercent = Math.min(100, Math.max(0, speed / maximumSpeed * 100));
+  const activeSegments = speed === 0 ? 0 : Math.ceil(speedPercent / 100 * SPEED_SEGMENTS);
+  const successStart = Math.min(100, GAME_BALANCE.damage.minimumSuccess / power / maximumSpeed * 100);
+  const successEnd = Math.min(100, GAME_BALANCE.damage.maximumSuccess / power / maximumSpeed * 100);
+
+  return (
+    <div className="speed-meter" role="meter" aria-label="現在のスピード" aria-valuemin={0} aria-valuemax={maximumSpeed} aria-valuenow={Math.round(speed)}>
+      <span className="speed-meter__title">SPEED</span>
+      <div className="speed-meter__body">
+        <div className="speed-meter__sweetspot" style={{ bottom: `${successStart}%`, height: `${Math.max(4, successEnd - successStart)}%` }}><span>GOOD</span></div>
+        <div className="speed-meter__segments" aria-hidden="true">
+          {Array.from({ length: SPEED_SEGMENTS }, (_, index) => {
+            const isActive = index >= SPEED_SEGMENTS - activeSegments;
+            return <i key={index} className={isActive ? "is-active" : ""} />;
+          })}
+        </div>
+        <span className="speed-meter__needle" style={{ bottom: `calc(${speedPercent}% - 8px)` }}>◀</span>
+      </div>
+      <span className="speed-meter__caption">POWER</span>
+    </div>
+  );
+}
+
 function segmentHitsCircle(start: Point, end: Point, center: Point, radius: number): boolean {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
@@ -97,7 +124,7 @@ export function HitScreen({ weapon, debug, onResolved }: HitScreenProps) {
         <header className="hit-heading">
           <p className="eyebrow">FIND THE SWEET SPOT</p>
           <h1>絶妙な一撃を決めろ！</h1>
-          <p>武器をドラッグして、犯人の頭へ当てよう！勢いが弱すぎても強すぎても失敗だ。</p>
+          <p>武器の照準マークを、犯人の頭の光る円へ当てよう！勢いが弱すぎても強すぎても失敗だ。</p>
         </header>
         {debug && <aside className="debug-panel">
           <strong>DEBUG MONITOR</strong>
@@ -109,6 +136,7 @@ export function HitScreen({ weapon, debug, onResolved }: HitScreenProps) {
         </aside>}
         <div className="hit-arena" ref={arenaRef}>
           <div className="speed-guide" aria-hidden="true"><span>弱</span><i /><span>適切</span><i /><span>強</span></div>
+          <SpeedMeter speed={displaySpeed} power={power} />
           <div
             ref={weaponRef}
             className={`draggable-weapon draggable-weapon--${weapon}`}
@@ -123,15 +151,17 @@ export function HitScreen({ weapon, debug, onResolved }: HitScreenProps) {
           >
             <span className="grab-label">つかむ！</span>
             <WeaponArt weapon={weapon} />
+            <span className="weapon-center-mark" aria-hidden="true" />
           </div>
           <div className="target-person" aria-label="犯人の頭">
             <div ref={headRef} className={`target-head ${debug ? "target-head--debug" : ""}`}><span>!</span></div>
+            <div className="target-zone-indicator" aria-hidden="true"><span>HIT ZONE</span></div>
             <div className="target-shoulders" />
           </div>
-          <div className="aim-label">ここを狙え！<span>↓</span></div>
+          <div className="aim-label">光る円を狙え！<span>↓</span></div>
           {impact && <div className="impact-word">ポコン！</div>}
         </div>
-        <p className="drag-note"><span>☝</span> 武器を押したまま動かし、頭に当てよう</p>
+        <p className="drag-note"><span>☝</span> 武器を押したまま動かし、照準マークと光る円を重ねよう</p>
       </div>
     </SceneShell>
   );

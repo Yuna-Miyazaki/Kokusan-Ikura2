@@ -9,7 +9,9 @@ export const GAME_BALANCE = {
     windowMs: 130,
   },
   persuasion: {
-    confessionThreshold: 40,
+    confessionThreshold: 50,
+    minimumConfessionProbability: 0.2,
+    initialRemorseExponent: 2,
     kindBonus: 25,
     logicalBonus: 18,
     sternBonusMin: 10,
